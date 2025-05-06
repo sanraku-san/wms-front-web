@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaImage, FaUpload } from 'react-icons/fa';
+import { getProducts } from '../api/products';
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
@@ -34,6 +35,19 @@ export default function Inventory() {
     }
   };
 
+  useEffect(() => {
+    setLoading(true);
+    getProducts().then((res) => {
+      setProducts(res.data);
+      setFilteredProducts(res.data);
+      setLoading(false);
+    }).catch((error) => {
+      console.error("Error fetching products:", error);
+      setLoading(false);
+    });
+  }, []);
+
+
   // Reset image preview when modal closes
   useEffect(() => {
     if (!showAddEditModal) {
@@ -57,48 +71,23 @@ export default function Inventory() {
     setShowDetailsModal(true);
   };
 
-  // Sample categories
-  const categories = ['Electronics', 'Furniture', 'Office Supplies', 'Clothing', 'Other'];
-
-  // Sample product data - in a real app, this would come from an API
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const sampleProducts = [
-        { id: 1, name: 'Wireless Headphones', sku: 'SKU-1234', category: 'Electronics', price: 89.99, stock: 145, image: 'https://via.placeholder.com/150', description: 'High-quality wireless headphones with noise cancellation' },
-        { id: 2, name: 'Ergonomic Chair', sku: 'SKU-5678', category: 'Furniture', price: 249.99, stock: 78, image: 'https://via.placeholder.com/150', description: 'Comfortable ergonomic office chair with lumbar support' },
-        { id: 3, name: 'Laptop Stand', sku: 'SKU-9012', category: 'Office Supplies', price: 39.99, stock: 124, image: 'https://via.placeholder.com/150', description: 'Adjustable laptop stand for better posture' },
-        { id: 4, name: 'USB-C Hub', sku: 'SKU-3456', category: 'Electronics', price: 59.99, stock: 89, image: 'https://via.placeholder.com/150', description: '7-in-1 USB-C hub with HDMI, USB-A, and SD card reader' },
-        { id: 5, name: 'Desk Lamp', sku: 'SKU-7890', category: 'Office Supplies', price: 34.99, stock: 56, image: 'https://via.placeholder.com/150', description: 'LED desk lamp with adjustable brightness and color temperature' },
-        { id: 6, name: 'Wireless Mouse', sku: 'SKU-2345', category: 'Electronics', price: 29.99, stock: 210, image: 'https://via.placeholder.com/150', description: 'Ergonomic wireless mouse with long battery life' },
-        { id: 7, name: 'Notebook Set', sku: 'SKU-6789', category: 'Office Supplies', price: 19.99, stock: 320, image: 'https://via.placeholder.com/150', description: 'Set of 3 premium notebooks with different page styles' },
-        { id: 8, name: 'Standing Desk', sku: 'SKU-0123', category: 'Furniture', price: 399.99, stock: 42, image: 'https://via.placeholder.com/150', description: 'Electric standing desk with memory settings' },
-      ];
-      setProducts(sampleProducts);
-      setFilteredProducts(sampleProducts);
-      setLoading(false);
-    }, 1000);
-  }, []);
 
   // Filter and sort products
   useEffect(() => {
     let result = [...products];
-    
-    // Apply search filter
+  
     if (searchTerm) {
-      result = result.filter(product => 
+      result = result.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
-    // Apply category filter
+  
     if (selectedCategory) {
-      result = result.filter(product => product.category === selectedCategory);
+      result = result.filter(product => product.category?.name === selectedCategory);
     }
-    
-    // Apply sorting
+  
     result.sort((a, b) => {
       let comparison = 0;
       if (sortField === 'name') {
@@ -108,12 +97,12 @@ export default function Inventory() {
       } else if (sortField === 'stock') {
         comparison = a.stock - b.stock;
       }
-      
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-    
-    setFilteredProducts(result);
+  
+    setFilteredProducts(result); // ✅ Only update the filtered version
   }, [products, searchTerm, selectedCategory, sortField, sortDirection]);
+  
 
   // Handle product deletion
   const handleDelete = (id) => {
@@ -248,7 +237,7 @@ export default function Inventory() {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64">
             <FaSearch className="text-gray-400 text-4xl mb-4" />
             <h3 className="text-lg font-medium text-gray-900">No products found</h3>
@@ -256,7 +245,7 @@ export default function Inventory() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map(product => (
+            {filteredProducts.map((product) => (
               <div 
                 key={product.id} 
                 className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
@@ -300,10 +289,10 @@ export default function Inventory() {
                   <div className="flex justify-between items-start">
                     <h3 className="font-medium text-gray-800">{product.name}</h3>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                      {product.category}
+                      {product.category?.name}
                     </span>
+                    <p className="text-sm text-gray-500 mt-1">{product.sku}</p>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{product.sku}</p>
                   <div className="mt-2 flex justify-between items-center">
                     <p className="font-bold text-indigo-600">{formatCurrency(product.price)}</p>
                     <p className={`text-sm ${
@@ -384,7 +373,7 @@ export default function Inventory() {
                   <select
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    value={currentProduct.category}
+                    value={currentProduct.category?.name}
                     onChange={(e) => setCurrentProduct({...currentProduct, category: e.target.value})}
                   >
                     <option value="">Select a category</option>
@@ -532,9 +521,9 @@ export default function Inventory() {
                   <h2 className="text-2xl font-bold text-gray-800">{selectedProduct.name}</h2>
                   <div className="flex items-center mt-1">
                     <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                      {selectedProduct.category}
+                      {selectedProduct.category?.name}
                     </span>
-                    <span className="ml-2 text-sm text-gray-500">SKU: {selectedProduct.sku}</span>
+                    <span className="ml-2 text-sm text-gray-500">Barcode: {selectedProduct.barcode}</span>
                   </div>
                 </div>
                 
@@ -565,7 +554,7 @@ export default function Inventory() {
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <p className="text-xs text-gray-500">Category</p>
-                  <p className="font-medium">{selectedProduct.category}</p>
+                  <p className="font-medium">{selectedProduct.category?.name}</p>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <p className="text-xs text-gray-500">SKU</p>
