@@ -10,4 +10,14 @@ export const getProducts = async ()=>{
     return res.json();
 }
 
+export const addProducts = async (data) => {
+    const res = await fetch (`${URL}/products`,{
+        method:"POST",
+        headers:{
+            Accept:"application/json",
+        }
+    });
+    return res.json(data);
+
+}
 

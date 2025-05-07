@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaImage, FaUpload } from 'react-icons/fa';
-import { getProducts } from '../api/products';
+import { getProducts, addProducts } from '../api/products';
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
@@ -112,17 +112,21 @@ export default function Inventory() {
   };
 
   // Handle add/edit product
-  const handleSaveProduct = (product) => {
+  const handleSaveProduct = async (product) => {
     if (product.id) {
       // Edit existing product
       setProducts(products.map(p => p.id === product.id ? product : p));
     } else {
       // Add new product
-      const newProduct = {
-        ...product,
-        id: Math.max(...products.map(p => p.id), 0) + 1
-      };
-      setProducts([...products, newProduct]);
+      try{
+        const res = await addProducts(product);
+        setProducts([...products, res]);
+        alert("successfully added")
+      } 
+      catch (error){
+        console.error("Error adding product", error);
+        alert("Error adding products");
+      }
     }
     setShowAddEditModal(false);
     setCurrentProduct(null);
@@ -373,13 +377,16 @@ export default function Inventory() {
                   <select
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    value={currentProduct.category?.name}
-                    onChange={(e) => setCurrentProduct({...currentProduct, category: e.target.value})}
+                    value={currentProduct.category_id || ''}
+                    onChange={(e) => setCurrentProduct({...currentProduct, category_id: e.target.value})}
                   >
                     <option value="">Select a category</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
+                    {/* Assuming your 'products' array contains objects with a 'category' object that has a 'name' */}
+                    {products.map(product => product.category?.name)
+                      .filter((value, index, self) => self.indexOf(value) === index)
+                      .map(categoryName => (
+                        <option key={categoryName} value={categoryName}>{categoryName}</option>
+                      ))}
                   </select>
                 </div>
                 <div>

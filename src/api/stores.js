@@ -9,3 +9,13 @@ export const getStores = async () => {
     });
     return res.json();
 }
+export const addStores = async (data) => {
+    const res = await fetch (`${URL}/stores`,{
+        method:"POST",
+        headers:{
+            Accept:"application/json",
+        }
+    });
+    return res.json(data);
+
+}
