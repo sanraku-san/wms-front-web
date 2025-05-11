@@ -1,29 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { getUsers } from "../api/accounts";
+import { getUsers,addAccount } from "../api/accounts";
+import withAuth from "../hoc/withAuth";
+import AccountModal from "../components/modals/AccountModal";
 
-export default function Accounts() {
+function Accounts() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [roleFilter, setRoleFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
-  const [currentAccount, setCurrentAccount] = useState(null);
+  const [currentAccount, setCurrentAccount] = useState({
+    id: null,
+    username: "",
+    firstName: "", // Added firstName
+    lastName: "", // Added lastName
+    email: "",
+    password: "",
+    roleId: 1, // Changed from role to roleId, default to 1
+    contactNumber: "", // Added contactNumber
+  });
   const [isEdit, setIsEdit] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Add this line
 
   const roles = ["All", "Admin", "Moderator", "User", "Viewer"];
 
   useEffect(() => {
     setLoading(true);
-    getUsers().then((res) => {
-      setAccounts(res.data);
-      console.log("resdata",res.data)
-      setLoading(false);
-    }).catch((error) => {
-      console.error("Error fetching users:", error);
-      setLoading(false);
-    })
+    getUsers()
+      .then((res) => {
+        // Adapt the data received from your API to match the expected structure
+        const adaptedAccounts = res.data.map((account) => ({
+          id: account.id,
+          username: account.username,
+          name: `${account.first_name} ${account.last_name}`, // Combine first and last names
+          firstName: account.first_name,
+          lastName: account.last_name,
+          email: account.email,
+          role: roles[account.role_id - 1], // Convert role_id to role name.  -1 because roles array is 0-indexed.
+          roleId: account.role_id,
+          contactNumber: account.contact_number,
+          password: '', // Don't show the password
+        }));
+        setAccounts(adaptedAccounts);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+        setLoading(false);
+      });
   }, []);
 
   const filteredAccounts =
@@ -32,43 +55,84 @@ export default function Accounts() {
       : accounts.filter((account) => account.role === roleFilter);
 
   const handleAdd = () => {
-    setCurrentAccount({
+    setCurrentAccount({ // include the new fields
       id: null,
       username: "",
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
-      role: "User",
+      roleId: 1,
+      contactNumber: "",
     });
     setIsEdit(false);
     setShowModal(true);
   };
 
   const handleEdit = (account) => {
-    setCurrentAccount(account);
+    setCurrentAccount({ // include the new fields
+      id: account.id,
+      username: account.username,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      email: account.email,
+      password: "", // Don't pre-fill password for editing
+      roleId: account.roleId,
+      contactNumber: account.contactNumber,
+    });
     setIsEdit(true);
     setShowModal(true);
-  };
-
-  const handleDelete = (id) => {
-    setAccounts(accounts.filter((account) => account.id !== id));
   };
 
   const handleSave = (e) => {
     e.preventDefault();
     if (isEdit) {
+      // Update existing account
       setAccounts(
         accounts.map((account) =>
-          account.id === currentAccount.id ? currentAccount : account
+          account.id === currentAccount.id
+            ? {
+                ...account,
+                username: currentAccount.username,
+                firstName: currentAccount.firstName,
+                lastName: currentAccount.lastName,
+                email: currentAccount.email,
+                role: roles[currentAccount.roleId - 1], // Convert roleId back to role name
+                roleId: currentAccount.roleId,
+                contactNumber: currentAccount.contactNumber,
+                password: currentAccount.password, // Include if it was updated
+              }
+            : account
         )
       );
     } else {
-      const newId = accounts.length
-        ? Math.max(...accounts.map((a) => a.id)) + 1
-        : 1;
-      setAccounts([...accounts, { ...currentAccount, id: newId }]);
+      // Add new account
+      const newId = accounts.length > 0 ? Math.max(...accounts.map((a) => a.id)) + 1 : 1;
+      const newAccount = {
+        id: newId,
+        username: currentAccount.username,
+        firstName: currentAccount.firstName,
+        lastName: currentAccount.lastName,
+        email: currentAccount.email,
+        role: roles[currentAccount.roleId-1], //convert roleId to name
+        roleId: currentAccount.roleId,
+        contactNumber: currentAccount.contactNumber,
+        password: currentAccount.password, // Include the password
+      };
+      setAccounts([...accounts, newAccount]);
     }
     setShowModal(false);
+    // Reset form
+    setCurrentAccount({
+      id: null,
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      roleId: 1,
+      contactNumber: "",
+    });
   };
 
   return (
@@ -108,7 +172,7 @@ export default function Accounts() {
               >
                 <path
                   fillRule="evenodd"
-                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 01-2 0v-3H6a1 1 0 010-2h3V6a1 1 0 011-1z"
                   clipRule="evenodd"
                 />
               </svg>
@@ -128,7 +192,7 @@ export default function Accounts() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      {account.name}
+                      {account.username}
                     </p>
                     <p className="text-sm text-gray-500 truncate">
                       {account.email}
@@ -137,16 +201,16 @@ export default function Accounts() {
                   <div className="flex items-center gap-3">
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        account.role === "Admin"
+                        account.username === "Admin"
                           ? "bg-purple-100 text-purple-800"
-                          : account.role === "Moderator"
+                          : account.username === "Moderator"
                           ? "bg-blue-100 text-blue-800"
-                          : account.role === "User"
+                          : account.username === "User"
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {account.role}
+                      {account.username}
                     </span>
                     <div className="flex gap-2">
                       <button
@@ -214,182 +278,18 @@ export default function Accounts() {
       </div>
 
       {/* Account Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <form onSubmit={handleSave}>
-              <div className="space-y-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={currentAccount.username}
-                    onChange={(e) =>
-                      setCurrentAccount({
-                        ...currentAccount,
-                        username: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={currentAccount.name}
-                    onChange={(e) =>
-                      setCurrentAccount({
-                        ...currentAccount,
-                        name: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={currentAccount.email}
-                    onChange={(e) =>
-                      setCurrentAccount({
-                        ...currentAccount,
-                        email: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Password
-                  </label>
-                  <div className="relative group">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={currentAccount.password}
-                      onChange={(e) =>
-                        setCurrentAccount({
-                          ...currentAccount,
-                          password: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder={isEdit ? "Leave blank to keep current" : ""}
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                      </svg>
-                    </div>
-                    <div
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-400 hover:text-indigo-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-400 hover:text-indigo-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Role</label>
-                  <select
-                    value={currentAccount.role}
-                    onChange={(e) =>
-                      setCurrentAccount({
-                        ...currentAccount,
-                        role: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  >
-                    {roles
-                      .filter((r) => r !== "All")
-                      .map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                >
-                  {isEdit ? "Update" : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AccountModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        handleSave={handleSave}
+        currentAccount={currentAccount}
+        setCurrentAccount={setCurrentAccount}
+        isEdit={isEdit}
+      />
 
       <Outlet />
     </div>
   );
 }
+export default withAuth(Accounts);
+

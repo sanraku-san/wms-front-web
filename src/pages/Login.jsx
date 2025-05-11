@@ -1,14 +1,19 @@
+// src/pages/Login.jsx
 import React, { useState } from 'react';
 import { FaUser, FaLock, FaWarehouse, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../api/auth'; 
+import withoutAuth from '../hoc/withoutAuth';
 
-export default function Login() {
+ function Login() {
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,27 +27,26 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
-      // Replace with your actual authentication logic
-      console.log('Login attempt with:', credentials);
-      
-      // Simulate API call
-      setTimeout(() => {
-        if (credentials.username === 'admin' && credentials.password === 'password') {
-          // Successful login - redirect to dashboard or home
-          window.location.href = '/dashboard';
-        } else {
-          setError('Invalid username or password');
-        }
-        setLoading(false);
-      }, 1000);
-      
+      const responseData = await loginUser(credentials);
+      console.log('Login successful:', responseData);
+
+      // **IMPORTANT: Replace 'access_token' with the actual key from your backend response**
+      const authToken = responseData.data.token;
+
+      localStorage.setItem('authToken', authToken);
+
+      navigate('/dashboard');
+
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(err.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+    } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 via-gray-900 to-slate-900 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden relative">
@@ -79,13 +83,13 @@ export default function Login() {
                 <FaUser className="h-5 w-5 text-gray-400 group-hover:text-indigo-500 transition-colors duration-200" />
               </div>
               <input
-                id="username"
-                name="username"
+                id="email"
+                name="email"
                 type="text"
                 required
                 className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out sm:text-sm hover:border-indigo-300"
-                placeholder="Username"
-                value={credentials.username}
+                placeholder="Email"
+                value={credentials.email}
                 onChange={handleChange}
               />
             </div>
@@ -173,4 +177,4 @@ export default function Login() {
     </div>
   );
 }
-
+export default withoutAuth(Login);

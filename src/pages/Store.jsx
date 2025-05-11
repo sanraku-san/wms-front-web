@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { getStores } from "../api/stores";
+import { getStores, addStores } from "../api/stores"; // Import addStores
+import withAuth from "../hoc/withAuth";
+import StoreModal from "../components/modals/StoreModal";
 
-export default function Store() {
+function Store() {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -10,54 +12,68 @@ export default function Store() {
     id: null,
     name: "",
     address: "",
-    contact: "",
+    contact_number: "",
   });
   const [isEdit, setIsEdit] = useState(false);
 
-  useEffect(()=> {
-    setLoading(true);
-    getStores().then((res) => {
-      setStores(res.data);
-      setLoading(false);
-    }).catch((error) => {
-      console.error("Error fetching stores:", error);
-      setLoading(false);
-    });
-  }, []);
-
   const handleAdd = () => {
-    setCurrentStore({ id: null, name: "", address: "", contact: "" });
+    setCurrentStore({ id: null, name: "", address: "", contact_number: "" });
     setIsEdit(false);
     setShowModal(true);
   };
 
-  const handleEdit = (store) => {
+  const handleEditStore = (store) => {
     setCurrentStore(store);
     setIsEdit(true);
     setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   const handleDelete = (id) => {
     setStores(stores.filter((store) => store.id !== id));
   };
 
-  const handleSave = (e) => {
+  const handleSaveStore = async (e) => {
     e.preventDefault();
-    if (isEdit) {
-      setStores(
-        stores.map((store) =>
+    try {
+      if (isEdit) {
+        // Update existing store
+        const updatedStores = stores.map((store) =>
           store.id === currentStore.id ? { ...store, ...currentStore } : store
-        )
-      );
-    } else {
-      const newId = stores.length
-        ? Math.max(...stores.map((s) => s.id)) + 1
-        : 1;
-      setStores([...stores, { ...currentStore, id: newId }]);
+        );
+        setStores(updatedStores);
+        alert("Store updated successfully!");
+      } else {
+        // Add new store
+        const newStore = await addStores(currentStore);
+        if (newStore && newStore.data) {
+          setStores([...stores, newStore.data]);
+          alert("Store added successfully!");
+        }
+      }
+      setShowModal(false);
+      setCurrentStore({ id: null, name: "", address: "", contact_number: "" });
+    } catch (error) {
+      console.error("Error saving store:", error);
+      alert("Error saving store. Please try again.");
     }
-    setShowModal(false);
-    setCurrentStore({ id: null, name: "", address: "", contact: "" });
   };
+
+  useEffect(() => {
+    setLoading(true);
+    getStores()
+      .then((res) => {
+        setStores(res.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching stores:", error);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6 bg-gray-50 min-h-screen">
@@ -89,7 +105,7 @@ export default function Store() {
             >
               <div className="p-4">
                 <h2 className="text-lg font-bold text-gray-800 mb-2">
-                  {store.name}
+                  {store?.name}
                 </h2>
                 <div className="mb-3">
                   <p className="text-sm font-medium text-gray-500 mb-1">
@@ -101,12 +117,12 @@ export default function Store() {
                 </div>
                 <div className="mb-2">
                   <p className="text-sm font-medium text-gray-500">Contact</p>
-                  <p className="text-sm text-gray-700">{store.contact}</p>
+                  <p className="text-sm text-gray-700">{store.contact_number}</p>
                 </div>
               </div>
               <div className="border-t border-gray-100 px-4 py-3 bg-gray-50 flex gap-2">
                 <button
-                  onClick={() => handleEdit(store)}
+                  onClick={() => handleEditStore(store)}
                   className="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition font-medium text-sm flex-1"
                 >
                   Edit
@@ -129,88 +145,18 @@ export default function Store() {
       </div>
 
       {/* Modal for Add/Edit */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {isEdit ? "Edit Store" : "Add Store"}
-            </h3>
-            <form onSubmit={handleSave}>
-              <div className="space-y-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Store Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Store Name"
-                    value={currentStore.name}
-                    onChange={(e) =>
-                      setCurrentStore({ ...currentStore, name: e.target.value })
-                    }
-                    required
-                    autoFocus
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Address"
-                    value={currentStore.address}
-                    onChange={(e) =>
-                      setCurrentStore({
-                        ...currentStore,
-                        address: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Number
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Contact Number"
-                    value={currentStore.contact}
-                    onChange={(e) =>
-                      setCurrentStore({
-                        ...currentStore,
-                        contact: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  {isEdit ? "Update" : "Add"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <StoreModal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveStore}
+        currentStore={currentStore}
+        isEdit={isEdit}
+        setCurrentStore={setCurrentStore}
+      />
 
       <Outlet />
     </div>
   );
 }
+
+export default withAuth(Store);

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import withAuth from '../hoc/withAuth';
 import { FaBoxes, FaWarehouse, FaTruck, FaExclamationTriangle, FaChartLine, FaClipboardList, FaSearch, FaFilter, FaCalendarAlt, FaArrowUp, FaArrowDown, FaChartPie, FaChartBar } from 'react-icons/fa';
 // Import a charting library like Chart.js
 import { Line, Pie, Bar } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
-export default function Dashboard() {
+ function Dashboard() {
   const [timeRange, setTimeRange] = useState('week');
   const [showAllAlerts, setShowAllAlerts] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -531,3 +532,4 @@ export default function Dashboard() {
     </div>
   );
 }
+export default withAuth(Dashboard);

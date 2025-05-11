@@ -12,10 +12,34 @@ import {
   FaTimes,
   FaHistory,
 } from "react-icons/fa";
+import { logoutUser } from "../api/auth";
 
 // Layout component with sidebar and outlet for nested routes
 function AppLayout({ sidebarOpen, toggleSidebar, setIsLoggedIn }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const removeAuthToken = () => {
+    localStorage.removeItem("authToken");
+  };
+
+  
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      // Call the logout API function
+      await logoutUser();
+      // Remove the authentication token from localStorage
+      removeAuthToken();
+      // Update the isLoggedIn state (if you're managing it this way)
+      setIsLoggedIn(false);
+      // Redirect the user to the login page
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Handle logout error (e.g., display a message to the user)
+      alert("Failed to logout. Please try again.");
+    }
+  };
 
   // Navigation items
   const navItems = [
@@ -129,7 +153,7 @@ function AppLayout({ sidebarOpen, toggleSidebar, setIsLoggedIn }) {
           >
             <button
               className="flex items-center w-full text-gray-300 hover:text-white transition-colors duration-200"
-              onClick={() => setIsLoggedIn(false)}
+              onClick={handleLogout}
             >
               {sidebarOpen ? (
                 <>
@@ -185,6 +209,7 @@ export default function Sidebar() {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+  
 
   return (
     <AppLayout

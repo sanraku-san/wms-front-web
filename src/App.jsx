@@ -11,6 +11,8 @@ export default function App() {
     return path.charAt(0).toUpperCase() + path.slice(1);
   };
 
+  
+
   return (
     <div className="flex flex-row">
       <Sidebar />
