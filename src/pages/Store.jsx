@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { getStores, addStores } from "../api/stores"; // Import addStores
+import { getStores, addStores, deleteStore } from "../api/stores"; // Import addStores
 import withAuth from "../hoc/withAuth";
 import StoreModal from "../components/modals/StoreModal";
+import { ToastContainer, toast } from "react-toastify";
 
 function Store() {
   const [stores, setStores] = useState([]);
@@ -33,7 +34,18 @@ function Store() {
   };
 
   const handleDelete = (id) => {
-    setStores(stores.filter((store) => store.id !== id));
+    if (window.confirm("Are you sure you want to delete this store?")) {
+      deleteStore(id)
+        .then((res) => {
+          if (res) {
+            toast.success("Store deleted successfully!");
+            setStores(stores.filter((store) => store.id !== id));
+          }
+        })
+        .catch(() => {
+          toast.error("Failed to delete store.");
+        });
+    }
   };
 
   const handleSaveStore = async (e) => {
@@ -97,7 +109,22 @@ function Store() {
 
       {/* Store Grid */}
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {loading ? (
+           <div className="flex justify-center items-center h-64">
+           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+         </div>
+        ): stores.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64">
+                      <FaSearch className="text-gray-400 text-4xl mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900">
+                        No stores found
+                      </h3>
+                      <p className="text-gray-500 mt-1">
+                        Try adjusting your search or filters
+                      </p>
+                    </div>
+        ):(
+           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {stores.map((store) => (
             <div
               key={store.id}
@@ -117,7 +144,9 @@ function Store() {
                 </div>
                 <div className="mb-2">
                   <p className="text-sm font-medium text-gray-500">Contact</p>
-                  <p className="text-sm text-gray-700">{store.contact_number}</p>
+                  <p className="text-sm text-gray-700">
+                    {store.contact_number}
+                  </p>
                 </div>
               </div>
               <div className="border-t border-gray-100 px-4 py-3 bg-gray-50 flex gap-2">
@@ -142,6 +171,8 @@ function Store() {
             </div>
           )}
         </div>
+        )}
+       
       </div>
 
       {/* Modal for Add/Edit */}
@@ -155,6 +186,7 @@ function Store() {
       />
 
       <Outlet />
+      <ToastContainer />
     </div>
   );
 }

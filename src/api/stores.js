@@ -54,3 +54,15 @@ export const addStores = async (storeData) => {
     throw error;
   }
 };
+export const deleteStore = async (id) => {
+  const authToken = localStorage.getItem('authToken');
+  const res = await fetch(`${URL}/stores/${id}`,{
+    method:"DELETE",
+    headers:{
+      'Authorization': `Bearer ${authToken}`,
+      "Content-Type":"application/json",
+      Accept:"application/json",
+    },
+  });
+  return res.json();
+}
