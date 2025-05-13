@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import withAuth from '../hoc/withAuth';
 import { getTransactions } from '../api/transactions';
 import { TransactionDetailsModal } from '../components/modals/TransactDetails';
+import { ToastContainer ,toast } from 'react-toastify';
 
 // Helper function (adjust as needed) - using the function from the other component
 const formatCurrency = (amount) => {
@@ -70,8 +71,9 @@ function TransactionHistory() {
 
   const handleDelete = (id) => {
       const updatedTransactions = transactions.filter(txn => txn.id !== id);
+      toast.info("Transaction deleted successfully!");
       setTransactions(updatedTransactions);
-      setSelectedTransaction(null); // Close modal after deleting
+      setSelectedTransaction(null); 
   };
 
   if (loading) {
@@ -162,6 +164,7 @@ function TransactionHistory() {
                   onDelete={handleDelete}
               />
           )}
+          <ToastContainer />
       </div>
   );
 }

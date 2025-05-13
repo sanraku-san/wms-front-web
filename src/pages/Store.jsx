@@ -38,7 +38,7 @@ function Store() {
       deleteStore(id)
         .then((res) => {
           if (res) {
-            toast.success("Store deleted successfully!");
+            toast.info("Store deleted successfully!");
             setStores(stores.filter((store) => store.id !== id));
           }
         })
@@ -57,20 +57,20 @@ function Store() {
           store.id === currentStore.id ? { ...store, ...currentStore } : store
         );
         setStores(updatedStores);
-        alert("Store updated successfully!");
+        toast.info("Store updated successfully!");
       } else {
         // Add new store
         const newStore = await addStores(currentStore);
         if (newStore && newStore.data) {
           setStores([...stores, newStore.data]);
-          alert("Store added successfully!");
+          toast.success("Store added successfully!");
         }
       }
       setShowModal(false);
       setCurrentStore({ id: null, name: "", address: "", contact_number: "" });
     } catch (error) {
       console.error("Error saving store:", error);
-      alert("Error saving store. Please try again.");
+      toast.warning("Error saving store. Please try again.");
     }
   };
 

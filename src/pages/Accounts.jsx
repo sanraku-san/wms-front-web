@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { getUsers,addAccount } from "../api/accounts";
+import { getUsers, addAccount } from "../api/accounts";
 import withAuth from "../hoc/withAuth";
 import AccountModal from "../components/modals/AccountModal";
+import { ToastContainer, toast } from "react-toastify";
 
 function Accounts() {
   const [accounts, setAccounts] = useState([]);
@@ -38,7 +39,7 @@ function Accounts() {
           role: roles[account.role_id - 1], // Convert role_id to role name.  -1 because roles array is 0-indexed.
           roleId: account.role_id,
           contactNumber: account.contact_number,
-          password: '', // Don't show the password
+          password: "", // Don't show the password
         }));
         setAccounts(adaptedAccounts);
         setLoading(false);
@@ -55,7 +56,8 @@ function Accounts() {
       : accounts.filter((account) => account.role === roleFilter);
 
   const handleAdd = () => {
-    setCurrentAccount({ // include the new fields
+    setCurrentAccount({
+      // include the new fields
       id: null,
       username: "",
       firstName: "",
@@ -70,7 +72,8 @@ function Accounts() {
   };
 
   const handleEdit = (account) => {
-    setCurrentAccount({ // include the new fields
+    setCurrentAccount({
+      // include the new fields
       id: account.id,
       username: account.username,
       firstName: account.firstName,
@@ -80,6 +83,7 @@ function Accounts() {
       roleId: account.roleId,
       contactNumber: account.contactNumber,
     });
+    
     setIsEdit(true);
     setShowModal(true);
   };
@@ -88,6 +92,7 @@ function Accounts() {
     e.preventDefault();
     if (isEdit) {
       // Update existing account
+      toast.info("Store updated successfully!");
       setAccounts(
         accounts.map((account) =>
           account.id === currentAccount.id
@@ -107,14 +112,15 @@ function Accounts() {
       );
     } else {
       // Add new account
-      const newId = accounts.length > 0 ? Math.max(...accounts.map((a) => a.id)) + 1 : 1;
+      const newId =
+        accounts.length > 0 ? Math.max(...accounts.map((a) => a.id)) + 1 : 1;
       const newAccount = {
         id: newId,
         username: currentAccount.username,
         firstName: currentAccount.firstName,
         lastName: currentAccount.lastName,
         email: currentAccount.email,
-        role: roles[currentAccount.roleId-1], //convert roleId to name
+        role: roles[currentAccount.roleId - 1], //convert roleId to name
         roleId: currentAccount.roleId,
         contactNumber: currentAccount.contactNumber,
         password: currentAccount.password, // Include the password
@@ -288,8 +294,8 @@ function Accounts() {
       />
 
       <Outlet />
+      <ToastContainer />
     </div>
   );
 }
 export default withAuth(Accounts);
-

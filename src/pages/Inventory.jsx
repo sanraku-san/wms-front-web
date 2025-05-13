@@ -13,6 +13,7 @@ import AddEditProductModal from "../components/modals/addEditProductModal";
 import DeleteProductModal from "../components/modals/deleteProductModal";
 import ProductDetailsModal from "../components/modals/productDetailsModal";
 import withAuth from "../hoc/withAuth";
+import { ToastContainer ,toast } from 'react-toastify';
 
 function Inventory() {
   const [products, setProducts] = useState([]);
@@ -100,7 +101,7 @@ function Inventory() {
         }
       })
       .catch(() => {
-        alert("Failed to delete product.");
+        toast.warning("Failed to delete product.");
       });
   };
 
@@ -138,10 +139,10 @@ function Inventory() {
               : parseInt(res.data.stock, 10) || 0,
         };
         setProducts([...products, newProduct]);
-        alert("Successfully added");
+        toast.success("Successfully added");
       } catch (error) {
         console.error("Error adding product", error);
-        alert("Error adding product");
+        toast.error("Error adding product");
       }
     }
     setShowAddEditModal(false);
@@ -364,6 +365,7 @@ function Inventory() {
       />
 
       <Outlet />
+      <ToastContainer />
     </div>
   );
 }
