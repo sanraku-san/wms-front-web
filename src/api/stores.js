@@ -1,6 +1,6 @@
 import {URL} from "./configuration";
 
-
+//retrive
 export const getStores = async () => {
   const authToken = sessionStorage.getItem('authToken');
   if (!authToken) {
@@ -29,14 +29,16 @@ export const getStores = async () => {
     throw error;
   }
 };
+
+//create
 export const addStores = async (storeData) => {
-  const authToken = sessionStorage.getItem('authToken'); // Get auth token
+  const authToken = sessionStorage.getItem('authToken'); 
   try {
-    const response = await fetch(`${URL}/stores`, { //  Use your create store endpoint
+    const response = await fetch(`${URL}/stores`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`, // Include auth token
+        'Authorization': `Bearer ${authToken}`,
       },
       body: JSON.stringify(storeData),
     });
@@ -47,13 +49,15 @@ export const addStores = async (storeData) => {
       throw new Error(errorData.message || 'Failed to add store');
     }
 
-    const data = await response.json(); // Parse the JSON response
-    return data; // Return the newly created store data
+    const data = await response.json(); 
+    return data; 
   } catch (error) {
     console.error('Error adding store:', error);
     throw error;
   }
 };
+
+//delete
 export const deleteStore = async (id) => {
   const authToken = sessionStorage.getItem('authToken');
   const res = await fetch(`${URL}/stores/${id}`,{

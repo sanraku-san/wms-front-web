@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { getStores, addStores, deleteStore } from "../api/stores"; // Import addStores
+import { getStores, addStores, deleteStore } from "../api/stores"; 
 import withAuth from "../hoc/withAuth";
 import StoreModal from "../components/modals/StoreModal";
 import { ToastContainer, toast } from "react-toastify";
@@ -52,14 +52,14 @@ function Store() {
     e.preventDefault();
     try {
       if (isEdit) {
-        // Update existing store
+        
         const updatedStores = stores.map((store) =>
           store.id === currentStore.id ? { ...store, ...currentStore } : store
         );
         setStores(updatedStores);
         toast.info("Store updated successfully!");
       } else {
-        // Add new store
+        
         const newStore = await addStores(currentStore);
         if (newStore && newStore.data) {
           setStores([...stores, newStore.data]);

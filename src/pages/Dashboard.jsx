@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import withAuth from '../hoc/withAuth';
 import { FaBoxes, FaWarehouse, FaTruck, FaExclamationTriangle, FaChartLine, FaClipboardList, FaSearch, FaFilter, FaCalendarAlt, FaArrowUp, FaArrowDown, FaChartPie, FaChartBar } from 'react-icons/fa';
-// Import a charting library like Chart.js
+
 import { Line, Pie, Bar } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
@@ -13,7 +13,7 @@ Chart.register(...registerables);
   const [inventoryData, setInventoryData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Add missing data definitions
+
   const allAlerts = [
     { id: 1, severity: 'error', message: 'Product SKU-1234 is out of stock', time: '2h ago', actionRequired: 'Restock', actionLink: '#' },
     { id: 2, severity: 'warning', message: 'Low stock for SKU-5678', time: '4h ago', actionRequired: 'Review', actionLink: '#' },
@@ -22,10 +22,9 @@ Chart.register(...registerables);
     { id: 5, severity: 'warning', message: 'Product SKU-9012 near expiration', time: '1d ago', actionRequired: 'Check', actionLink: '#' },
   ];
   
-  // Display only 3 alerts unless showAllAlerts is true
   const alerts = showAllAlerts ? allAlerts : allAlerts.slice(0, 3);
   
-  // Top products data
+
   const topProducts = [
     { name: 'Wireless Headphones', stock: 145, percentage: 85, turnover: 3.2, daysInStock: 45 },
     { name: 'Ergonomic Chair', stock: 78, percentage: 65, turnover: 2.1, daysInStock: 62 },
@@ -33,14 +32,14 @@ Chart.register(...registerables);
     { name: 'USB-C Hub', stock: 89, percentage: 55, turnover: 3.8, daysInStock: 37 },
   ];
 
-  // Sample data - in a real app, this would come from your API
+  
   const inventoryStats = {
     totalItems: 1248,
     lowStock: 23,
     outOfStock: 7,
     categories: 15,
     change: 3.2,
-    // Enhanced analytics data
+   
     turnoverRate: 4.7,
     avgDaysInStock: 76,
     totalValue: 287650,
@@ -61,7 +60,7 @@ Chart.register(...registerables);
     ]
   };
   
-  // Format currency
+  
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
@@ -70,13 +69,12 @@ Chart.register(...registerables);
     }).format(value);
   };
 
-  // Simulate API call to fetch data
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // In a real app, this would be an API call
-        // await fetch('/api/inventory-analytics')
+        
         setTimeout(() => {
           setInventoryData({
             labels: inventoryStats.monthlyTrend.map(item => item.month),
@@ -108,7 +106,7 @@ Chart.register(...registerables);
     fetchData();
   }, [timeRange]);
 
-  // Chart options
+  
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -139,7 +137,6 @@ Chart.register(...registerables);
     }
   };
 
-  // Pie chart data for inventory distribution
   const pieData = {
     labels: inventoryStats.stockDistribution.map(item => item.category),
     datasets: [

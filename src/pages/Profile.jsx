@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../api/auth"; // Import the getUser function
+import { getUser } from "../api/auth";
 import { FaUser } from "react-icons/fa";
 
 export default function Profile() {

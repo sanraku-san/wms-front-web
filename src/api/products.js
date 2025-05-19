@@ -1,5 +1,7 @@
 import { URL } from "./configuration";
 
+
+//retrieve
 export const getProducts = async () => {
   const authToken = sessionStorage.getItem("authToken");
   if (!authToken) {
@@ -29,6 +31,7 @@ export const getProducts = async () => {
   }
 };
 
+//create
 export const addProducts = async (formData) => {
   const authToken = sessionStorage.getItem("authToken");
   const response = await fetch(`${URL}/products`, {
@@ -41,8 +44,9 @@ export const addProducts = async (formData) => {
   });
   if (!response.ok) throw new Error("Failed to add product");
   return await response.json();
-};
+}
 
+//delete
 export const deleteProduct = async (id) => {
   const authToken = sessionStorage.getItem("authToken");
   const res = await fetch(`${URL}/products/${id}`, {

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaImage, FaUpload, FaTrash } from 'react-icons/fa';
-import { getCategories } from '../../api/category'; // ✅ Import the getCategories function
+import { getCategories } from '../../api/category'; 
 
 function AddEditProductModal({ isOpen, onClose, onSave, currentProduct, categories = [] }) {
   const [product, setProduct] = useState(
     currentProduct || { name: '', barcode:'', category_id: '', price: 0, stock: 0, image: '', description: '' }
   );
-  const [localCategories, setLocalCategories] = useState([]); // ✅ Local state for categories
+  const [localCategories, setLocalCategories] = useState([]); 
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -15,7 +15,7 @@ function AddEditProductModal({ isOpen, onClose, onSave, currentProduct, categori
       if (categories.length === 0) {
         getCategories()
           .then((data) => {
-            console.log("Fetched categories:", data); // ✅ Confirm data is fetched
+            console.log("Fetched categories:", data); 
             setLocalCategories(data.data);
           })
           .catch((error) => console.error("Error fetching categories:", error));
@@ -44,7 +44,7 @@ function AddEditProductModal({ isOpen, onClose, onSave, currentProduct, categori
   const file = e.target.files[0];
   if (file) {
     setImagePreview(URL.createObjectURL(file));
-    setProduct({ ...product, image: file }); // Store the File, not the preview URL
+    setProduct({ ...product, image: file }); 
   }
 };
 
@@ -64,24 +64,22 @@ const handleSubmit = (e) => {
   formData.append('barcode', product.barcode);
   formData.append('category_id', product.category_id);
   formData.append('price', product.price);
-  formData.append('stock', product.stock); // Assuming you want to save stock as well
+  formData.append('stock', product.stock); 
   formData.append('description', product.description);
 
-  // Handle image for adding and editing
+ 
   const file = fileInputRef.current?.files[0];
 
   if (file) {
-    // If a new file is selected, append it
+    
     formData.append('image', file);
   } else if (product.id && imagePreview === null && currentProduct?.image) {
-    // If editing and the image preview is null (user removed the image),
-    // send an empty string to the backend to clear the image field.
+    
     formData.append('image', '');
   }
-  // If editing and no new file is selected, and the image preview is not null
-  // (meaning the existing image should be kept), we don't append the 'image' field.
+ 
 
-  onSave(formData, product.id); // Pass id for edit, undefined for add
+  onSave(formData, product.id); 
   onClose();
 };
 

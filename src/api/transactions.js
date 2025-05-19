@@ -1,5 +1,7 @@
 import { URL } from "./configuration";
 
+
+//retrieve
 export const getTransactions = async () => {
     const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
@@ -29,24 +31,25 @@ export const getTransactions = async () => {
     }
   };
 
+  //create
 export const createTransaction = async (transactionData) => {
-  const authToken = sessionStorage.getItem('authToken'); // Get auth token
+  const authToken = sessionStorage.getItem('authToken'); 
   if (!authToken) {
       throw new Error('Authentication token is required');
   }
 
   try {
-      const response = await fetch(`${URL}/transactions`, { // Replace with your actual API endpoint
+      const response = await fetch(`${URL}/transactions`, { 
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${authToken}`, // Include auth token
+              'Authorization': `Bearer ${authToken}`, 
           },
           body: JSON.stringify(transactionData),
       });
 
       if (!response.ok) {
-          // Attempt to get error message from response body
+          
           let errorMessage = 'Failed to create transaction';
           try {
               const errorJson = await response.json();
@@ -54,17 +57,17 @@ export const createTransaction = async (transactionData) => {
                   errorMessage = errorJson.message;
               }
           } catch (parseError) {
-              // If parsing JSON fails, keep the default message
+              
               console.error("Error parsing error response:", parseError);
           }
           throw new Error(errorMessage);
       }
 
       const responseData = await response.json();
-      return { success: true, data: responseData.data }; // Adjust based on your actual response structure
+      return { success: true, data: responseData.data }; 
   } catch (error) {
-      // Log the error for debugging
+      
       console.error("Error creating transaction:", error);
-      throw error; // Re-throw the error so the caller can handle it
+      throw error; 
   }
 };

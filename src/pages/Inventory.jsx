@@ -31,7 +31,7 @@ function Inventory() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const navigate = useNavigate();
-
+//retrieve
   useEffect(() => {
     setLoading(true);
     getProducts()
@@ -75,7 +75,7 @@ function Inventory() {
     result.sort((a, b) => {
       let comparison = 0;
       if (sortField === "name") {
-        comparison = (a.name || "").localeCompare(b.name || ""); // ✅ Ensuring name is never undefined
+        comparison = (a.name || "").localeCompare(b.name || ""); 
       } else if (sortField === "price") {
         comparison = (a.price || 0) - (b.price || 0);
       } else if (sortField === "stock") {
@@ -95,8 +95,8 @@ function Inventory() {
   const handleDeleteProduct = (id) => {
   deleteProduct(id)
     .then((res) => {
-      console.log("Delete response:", res); // Debug log
-      if (res && (res.status === 200 || res.success)) { // Adjust this check based on your API
+      console.log("Delete response:", res); 
+      if (res && (res.status === 200 || res.success)) { 
         setProducts(products.filter((product) => product.id !== id));
         setShowDeleteModal(false);
         setProductToDelete(null);
@@ -106,12 +106,12 @@ function Inventory() {
       }
     })
     .catch((error) => {
-      console.error("Delete error:", error); // Debug log
+      console.error("Delete error:", error);
       toast.warning("Failed to delete this product.");
     });
 };
 
-
+//saving edited or created product
 const handleSaveProduct = async (formData, id) => {
     try {
       let res;

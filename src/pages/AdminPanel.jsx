@@ -13,33 +13,32 @@ function AdminPanel() {
   const [currentAccount, setCurrentAccount] = useState({
     id: null,
     username: "",
-    firstName: "", // Added firstName
-    lastName: "", // Added lastName
+    firstName: "", 
+    lastName: "", 
     email: "",
     password: "",
-    roleId: 1, // Changed from role to roleId, default to 1
-    contactNumber: "", // Added contactNumber
+    roleId: 1, 
+    contactNumber: "", 
   });
   const [isEdit, setIsEdit] = useState(false);
 
   const roles = ["All", "Admin", "Moderator", "User", "Viewer"];
-
+//retrieve
   useEffect(() => {
     setLoading(true);
     getUsers()
       .then((res) => {
-        // Adapt the data received from your API to match the expected structure
+        
         const adaptedAccounts = res.data.map((account) => ({
           id: account.id,
           username: account.username,
-          name: `${account.first_name} ${account.last_name}`, // Combine first and last names
-          firstName: account.first_name,
+          name: `${account.first_name} ${account.last_name}`, 
           lastName: account.last_name,
           email: account.email,
-          role: roles[account.role_id - 1], // Convert role_id to role name.  -1 because roles array is 0-indexed.
+          role: roles[account.role_id - 1], 
           roleId: account.role_id,
           contactNumber: account.contact_number,
-          password: "", // Don't show the password
+          password: "",
         }));
         setAccounts(adaptedAccounts);
         setLoading(false);
@@ -49,15 +48,14 @@ function AdminPanel() {
         setLoading(false);
       });
   }, []);
-
+//filter
   const filteredAccounts =
     roleFilter === "All"
       ? accounts
       : accounts.filter((account) => account.role === roleFilter);
 
   const handleAdd = () => {
-    setCurrentAccount({
-      // include the new fields
+    setCurrentAccount({  
       id: null,
       username: "",
       firstName: "",
@@ -70,16 +68,16 @@ function AdminPanel() {
     setIsEdit(false);
     setShowModal(true);
   };
-
+//edit
   const handleEdit = (account) => {
     setCurrentAccount({
-      // include the new fields
+     
       id: account.id,
       username: account.username,
       firstName: account.firstName,
       lastName: account.lastName,
       email: account.email,
-      password: "", // Don't pre-fill password for editing
+      password: "", 
       roleId: account.roleId,
       contactNumber: account.contactNumber,
     });
@@ -91,7 +89,7 @@ function AdminPanel() {
   const handleSave = (e) => {
     e.preventDefault();
     if (isEdit) {
-      // Update existing account
+      
       toast.info("Store updated successfully!");
       setAccounts(
         accounts.map((account) =>
@@ -102,16 +100,16 @@ function AdminPanel() {
                 firstName: currentAccount.firstName,
                 lastName: currentAccount.lastName,
                 email: currentAccount.email,
-                role: roles[currentAccount.roleId - 1], // Convert roleId back to role name
+                role: roles[currentAccount.roleId - 1], 
                 roleId: currentAccount.roleId,
                 contactNumber: currentAccount.contactNumber,
-                password: currentAccount.password, // Include if it was updated
+                password: currentAccount.password, 
               }
             : account
         )
       );
     } else {
-      // Add new account
+      
       const newId =
         accounts.length > 0 ? Math.max(...accounts.map((a) => a.id)) + 1 : 1;
       const newAccount = {
@@ -120,15 +118,15 @@ function AdminPanel() {
         firstName: currentAccount.firstName,
         lastName: currentAccount.lastName,
         email: currentAccount.email,
-        role: roles[currentAccount.roleId - 1], //convert roleId to name
+        role: roles[currentAccount.roleId - 1], 
         roleId: currentAccount.roleId,
         contactNumber: currentAccount.contactNumber,
-        password: currentAccount.password, // Include the password
+        password: currentAccount.password, 
       };
       setAccounts([...accounts, newAccount]);
     }
     setShowModal(false);
-    // Reset form
+
     setCurrentAccount({
       id: null,
       username: "",

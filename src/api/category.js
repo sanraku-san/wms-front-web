@@ -1,14 +1,14 @@
 import { URL } from "./configuration";
 
-
+//retrieve
 export const getCategories = async () => {
-    const authToken = sessionStorage.getItem('authToken'); // Get auth token
+    const authToken = sessionStorage.getItem('authToken'); 
   
     try {
-      const response = await fetch(`${URL}/categories`, { //  Use your get categories endpoint
+      const response = await fetch(`${URL}/categories`, { 
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`, // Include auth token
+          'Authorization': `Bearer ${authToken}`, 
           'Accept': 'application/json',
         },
       });

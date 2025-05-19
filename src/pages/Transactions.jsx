@@ -12,23 +12,23 @@ import { ToastContainer ,toast} from 'react-toastify';
   function Transactions() {
     const [transaction, setTransaction] = useState({
         date: '',
-        store_id: '', // Changed to store_id
-        transaction_type_id: '2', // Changed to transaction_type_id
-        total_transaction_price: 0, // Changed to total_transaction_price
-      products: [], // Changed to products
+        store_id: '', 
+        transaction_type_id: '2', 
+        total_transaction_price: 0, 
+      products: [], 
   });
 
-  const [stores, setStores] = useState([]); // Adjust type
-  const [products, setProducts] = useState([]); // Add stock
+  const [stores, setStores] = useState([]); 
+  const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const authToken = sessionStorage.getItem('authToken');
 
-  // --- Fetch Data ---
+ 
   useEffect(() => {
       if (!authToken) {
-          navigate('/login'); // Redirect if no auth token
+          navigate('/login'); 
           return;
       }
 
@@ -38,8 +38,8 @@ import { ToastContainer ,toast} from 'react-toastify';
           try {
               const storesData = await getStores(authToken);
               const productsData = await getProducts(authToken);
-              setStores(storesData.data); // Adjust based on your actual response structure
-              setProducts(productsData.data); // Adjust
+              setStores(storesData.data); 
+              setProducts(productsData.data); 
           } catch (err) {
               setError(err.message || 'An error occurred');
           } finally {
@@ -50,7 +50,7 @@ import { ToastContainer ,toast} from 'react-toastify';
       fetchData();
   }, [authToken, navigate]);
 
-  // --- Handle Changes ---
+ 
   const handleChange = (e) => {
       const { name, value } = e.target;
       setTransaction(prev => ({ ...prev, [name]: value }));
@@ -61,18 +61,18 @@ import { ToastContainer ,toast} from 'react-toastify';
           const existingProductIndex = prev.products.findIndex(p => p.product_id === productId);
 
           if (quantity <= 0) {
-              // Remove the product if quantity is zero or negative
+              
               const updatedProducts = prev.products.filter(p => p.product_id !== productId);
               return { ...prev, products: updatedProducts };
           }
 
           if (existingProductIndex > -1) {
-              // Update existing product quantity
+              
               const updatedProducts = [...prev.products];
               updatedProducts[existingProductIndex] = { product_id: productId, quantity };
               return { ...prev, products: updatedProducts };
           } else {
-              // Add new product
+            
               return { ...prev, products: [...prev.products, { product_id: productId, quantity }] };
           }
       });
@@ -85,7 +85,7 @@ import { ToastContainer ,toast} from 'react-toastify';
       }));
   };
 
-  // --- Calculate Total Price ---
+
   useEffect(() => {
       let total = 0;
       transaction.products.forEach(item => {
@@ -97,7 +97,6 @@ import { ToastContainer ,toast} from 'react-toastify';
       setTransaction(prev => ({ ...prev, total_transaction_price: total }));
   }, [transaction.products, products]);
 
-  // --- Handle Submit ---
   const handleSubmit = async (e) => {
       e.preventDefault();
       if (!authToken) return;
@@ -105,7 +104,7 @@ import { ToastContainer ,toast} from 'react-toastify';
       setLoading(true);
       setError(null);
 
-      // Validate store_id and transaction_type_id
+   
       if (!transaction.store_id || !transaction.transaction_type_id) {
           setError("Please select a store and transaction type.");
           setLoading(false);
@@ -114,7 +113,7 @@ import { ToastContainer ,toast} from 'react-toastify';
 
       try {
           const responseData = await createTransaction(transaction, authToken);
-          // Handle success (e.g., show message, redirect)
+         
           console.log('Transaction created:', responseData);
           toast.success("Transaction created successfully!")
           
@@ -129,7 +128,7 @@ import { ToastContainer ,toast} from 'react-toastify';
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-PH', {
         style: 'currency',
-        currency: 'PHP' // Philippine Peso
+        currency: 'PHP'
     }).format(amount);
 };
 
@@ -271,7 +270,7 @@ import { ToastContainer ,toast} from 'react-toastify';
                       <button
                           type="button"
                           onClick={() => {
-                              // Add a new product with an empty product_id and quantity of 1
+                              
                               setTransaction((prev) => ({
                                   ...prev,
                                   products: [...prev.products, { product_id: '', quantity: 1 }],
@@ -289,7 +288,7 @@ import { ToastContainer ,toast} from 'react-toastify';
                           type="submit"
                           className={
                               "bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium shadow-sm px-6 py-2 rounded-lg" +
-                              (loading ? " opacity-70 cursor-not-allowed" : "") // Conditional class
+                              (loading ? " opacity-70 cursor-not-allowed" : "")
                           }
                           disabled={loading}
                       >

@@ -5,11 +5,11 @@ import { getTransactions } from '../api/transactions';
 import { TransactionDetailsModal } from '../components/modals/TransactDetails';
 import { ToastContainer ,toast } from 'react-toastify';
 
-// Helper function (adjust as needed) - using the function from the other component
+
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-PH', {
         style: 'currency',
-        currency: 'PHP' // Philippine Peso
+        currency: 'PHP' 
     }).format(amount);
 };
 

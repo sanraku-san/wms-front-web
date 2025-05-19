@@ -1,6 +1,6 @@
-// src/api/auth.js
-import { URL } from './configuration'; // Adjust this import path if needed
 
+import { URL } from './configuration'; 
+//login
 export const loginUser = async (credentials) => {
   try {
     const response = await fetch(`${URL}/login`, {
@@ -24,6 +24,8 @@ export const loginUser = async (credentials) => {
     throw error;
   }
 };
+
+//logout
 export const logoutUser = async () => {
     const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
@@ -31,8 +33,8 @@ export const logoutUser = async () => {
     }
   
     try {
-      const response = await fetch(`${URL}/logout`, { //  Use your logout endpoint
-        method: 'POST', //  or the correct method for your backend
+      const response = await fetch(`${URL}/logout`, { 
+        method: 'POST', 
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Accept': 'application/json',
@@ -44,44 +46,44 @@ export const logoutUser = async () => {
         console.error('Logout failed:', errorData);
         throw new Error(errorData.message || 'Logout failed');
       }
-      //  No need to return anything, but you could return response.json() if needed.
+      
     } catch (error) {
       console.error('Error during logout:', error);
       throw error;
     }
   };
 
-
+//getting logged in user
   export const getUser = async (authToken) => {
   try {
-    const response = await fetch(`${URL}/users`, { //  Use the /me endpoint
+    const response = await fetch(`${URL}/users`, { 
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json', //  Most APIs expect this
+        'Content-Type': 'application/json', 
       },
     });
 
     if (!response.ok) {
-      //  Handle HTTP errors (e.g., 401 Unauthorized, 500 Server Error)
+      
       let errorMessage = 'Failed to fetch user data';
       try {
         const errorData = await response.json();
         if (errorData && errorData.message) {
-          errorMessage = errorData.message; // Use the error message from the backend if available
+          errorMessage = errorData.message; 
         }
       } catch (jsonError) {
-        // If it fails to parse the json, keep the original message
+        
         console.error("Error parsing error response", jsonError);
       }
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    return data; //  Return the successful response data
+    return data; 
   } catch (error) {
-    //  Catch network errors or errors thrown above
+    
     console.error('Error fetching user data:', error);
-    throw error; // Re-throw the error to be handled by the caller
+    throw error; 
   }
 };

@@ -6,7 +6,7 @@ export const TransactionDetailsModal = ({ transaction, onClose, onDelete }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-PH", {
       style: "currency",
-      currency: "PHP", // Philippine Peso
+      currency: "PHP", 
     }).format(amount);
   };
 
@@ -57,7 +57,7 @@ export const TransactionDetailsModal = ({ transaction, onClose, onDelete }) => {
             {transaction.products && transaction.products.length > 0 ? (
               <div className="border border-gray-300 rounded-lg p-3 mt-2 overflow-y-auto max-h-48">
                 {" "}
-                {/* ✅ Scrollable */}
+                {/*  Scrollable */}
                 {transaction.products.map((product) => (
                   <div
                     key={product.id}

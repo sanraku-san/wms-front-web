@@ -9,7 +9,7 @@ const AccountModal = ({
   isEdit,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  // Define the roles.  Make sure this matches the roles in your database.
+  
   const roles = ["Admin", "Moderator", "User", "Viewer"];
 
   if (!showModal) return null;
@@ -36,7 +36,7 @@ const AccountModal = ({
                 required
                 minLength={4}
                 maxLength={32}
-                pattern="[a-zA-Z0-9_-]+" // alpha_dash equivalent
+                pattern="[a-zA-Z0-9_-]+" 
               />
             </div>
             <div>

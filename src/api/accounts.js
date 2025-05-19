@@ -1,5 +1,5 @@
 import { URL } from "./configuration";
-
+//retrieve
 export const getUsers = async () => {
     const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
@@ -15,7 +15,6 @@ export const getUsers = async () => {
           'Accept': 'application/json',
         },
       });
-  
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Failed to fetch accounts:', errorData);
@@ -28,6 +27,8 @@ export const getUsers = async () => {
       throw error;
     }
   };
+
+//create
   export const addAccount = async (accountData) => {
     const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
@@ -35,7 +36,7 @@ export const getUsers = async () => {
     }
   
     try {
-      const response = await fetch(`${URL}/users`, { //  Use your create account endpoint
+      const response = await fetch(`${URL}/users`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,6 +57,8 @@ export const getUsers = async () => {
       throw error;
     }
   };
+
+  //delete
   export const deleteUser = async (id) => {
     const authToken = sessionStorage.getItem('authToken');
     const res = await fetch(`${URL}/users/${id}`,{

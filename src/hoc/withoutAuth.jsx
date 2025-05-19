@@ -8,14 +8,11 @@ const withoutAuth = (WrappedComponent) => {
 
     useEffect(() => {
       if (isLoggedIn) {
-        navigate('/dashboard'); // Or any other authenticated route
+        navigate('/dashboard'); 
       }
     }, [isLoggedIn, navigate]);
-
-    return !isLoggedIn ? <WrappedComponent {...props} /> : null; //important
+    return !isLoggedIn ? <WrappedComponent {...props} /> : null; 
   };
-
   return WithOutAuth;
 };
-
 export default withoutAuth;
