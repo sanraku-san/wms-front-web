@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
   FaPlus,
   FaSearch,
@@ -8,12 +8,12 @@ import {
   FaSortAmountUp,
   FaImage,
 } from "react-icons/fa";
-import { getProducts, addProducts, deleteProduct } from "../api/products";
+import { getProducts, addProducts, deleteProduct ,editProduct} from "../api/products";
 import AddEditProductModal from "../components/modals/addEditProductModal";
 import DeleteProductModal from "../components/modals/deleteProductModal";
 import ProductDetailsModal from "../components/modals/productDetailsModal";
 import withAuth from "../hoc/withAuth";
-import { ToastContainer ,toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 
 function Inventory() {
   const [products, setProducts] = useState([]);
@@ -30,6 +30,7 @@ function Inventory() {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -92,62 +93,58 @@ function Inventory() {
   };
 
   const handleDeleteProduct = (id) => {
-    deleteProduct(id)
-      .then((res) => {
-        if (res) {
-          setProducts(products.filter((product) => product.id !== id));
-          setShowDeleteModal(false);
-          setProductToDelete(null);
-        }
-      })
-      .catch(() => {
+  deleteProduct(id)
+    .then((res) => {
+      console.log("Delete response:", res); // Debug log
+      if (res && (res.status === 200 || res.success)) { // Adjust this check based on your API
+        setProducts(products.filter((product) => product.id !== id));
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+        toast.success("Product deleted successfully.");
+      } else {
         toast.warning("Failed to delete product.");
-      });
-  };
-
-  const handleSaveProduct = async (product) => {
-    // Ensure price and stock are numbers before saving
-    const formattedProduct = {
-      ...product,
-      price:
-        typeof product.price === "number"
-          ? product.price
-          : parseInt(product.price, 10) || 0,
-      stock:
-        typeof product.stock === "number"
-          ? product.stock
-          : parseInt(product.stock, 10) || 0,
-    };
-
-    if (product.id) {
-      setProducts(
-        products.map((p) => (p.id === product.id ? formattedProduct : p))
-      );
-    } else {
-      try {
-        const res = await addProducts(formattedProduct);
-        // Adjust to handle the 'data' object in the response
-        const newProduct = {
-          ...res.data, // Extract product data from res.data
-          price:
-            typeof res.data.price === "number"
-              ? res.data.price
-              : parseInt(res.data.price, 10) || 0,
-          stock:
-            typeof res.data.stock === "number"
-              ? res.data.stock
-              : parseInt(res.data.stock, 10) || 0,
-        };
-        setProducts([...products, newProduct]);
-        toast.success("Successfully added");
-      } catch (error) {
-        console.error("Error adding product", error);
-        toast.error("Error adding product");
       }
+    })
+    .catch((error) => {
+      console.error("Delete error:", error); // Debug log
+      toast.warning("Failed to delete this product.");
+    });
+};
+
+
+const handleSaveProduct = async (formData, id) => {
+    try {
+      let res;
+      if (id) {
+        res = await editProduct(id, formData);
+        if (res && res.data) {
+          setProducts(
+            products.map((p) => (p.id === id ? { ...p, ...res.data } : p))
+          );
+          navigate('/inventory')
+          toast.success("Product updated successfully.");
+        } else {
+          toast.error("Failed to update product.");
+          console.error("Edit response invalid:", res);
+        }
+      } else {
+        res = await addProducts(formData);
+        if (res && res.data) {
+          setProducts([...products, res.data]);
+          toast.success("Successfully added");
+        } else {
+          toast.error("Failed to add product.");
+          console.error("Add response invalid:", res);
+        }
+      }
+    } catch (error) {
+      console.error("Error saving product", error);
+      toast.error("Error saving product");
     }
     setShowAddEditModal(false);
     setCurrentProduct(null);
   };
+
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("en-PH", {
@@ -362,6 +359,16 @@ function Inventory() {
         onClose={() => setShowDetailsModal(false)}
         product={selectedProduct}
         formatCurrency={formatCurrency}
+        onEdit={() => {
+          setCurrentProduct(selectedProduct);
+          setShowAddEditModal(true);
+          setShowDetailsModal(false);
+        }}
+        onDelete={() => {
+          setProductToDelete(selectedProduct);
+          setShowDeleteModal(true);
+          setShowDetailsModal(false);
+        }}
       />
 
       <Outlet />

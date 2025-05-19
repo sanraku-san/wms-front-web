@@ -21,7 +21,7 @@ function TransactionHistory() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const authToken = localStorage.getItem('authToken');
+  const authToken = sessionStorage.getItem('authToken');
 
 
   useEffect(() => {

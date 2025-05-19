@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const withAuth = (WrappedComponent) => {
   const AuthWrapper = (props) => {
     const navigate = useNavigate();
-    const authToken = localStorage.getItem('authToken'); // Or however you store your token
+    const authToken = sessionStorage.getItem('authToken'); // Or however you store your token
 
     useEffect(() => {
       if (!authToken) {

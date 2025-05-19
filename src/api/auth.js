@@ -25,7 +25,7 @@ export const loginUser = async (credentials) => {
   }
 };
 export const logoutUser = async () => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
       throw new Error('No authentication token found.');
     }
@@ -50,4 +50,38 @@ export const logoutUser = async () => {
       throw error;
     }
   };
-  
+
+
+  export const getUser = async (authToken) => {
+  try {
+    const response = await fetch(`${URL}/users`, { //  Use the /me endpoint
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json', //  Most APIs expect this
+      },
+    });
+
+    if (!response.ok) {
+      //  Handle HTTP errors (e.g., 401 Unauthorized, 500 Server Error)
+      let errorMessage = 'Failed to fetch user data';
+      try {
+        const errorData = await response.json();
+        if (errorData && errorData.message) {
+          errorMessage = errorData.message; // Use the error message from the backend if available
+        }
+      } catch (jsonError) {
+        // If it fails to parse the json, keep the original message
+        console.error("Error parsing error response", jsonError);
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return data; //  Return the successful response data
+  } catch (error) {
+    //  Catch network errors or errors thrown above
+    console.error('Error fetching user data:', error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};

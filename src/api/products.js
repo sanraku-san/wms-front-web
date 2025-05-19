@@ -1,7 +1,7 @@
 import { URL } from "./configuration";
 
 export const getProducts = async () => {
-  const authToken = localStorage.getItem("authToken");
+  const authToken = sessionStorage.getItem("authToken");
   if (!authToken) {
     throw new Error("No authentication token found.");
   }
@@ -29,41 +29,43 @@ export const getProducts = async () => {
   }
 };
 
-export const addProducts = async (productData) => {
-  const authToken = localStorage.getItem("authToken"); // Get auth token
-  try {
-    const response = await fetch(`${URL}/products`, {
-      //  Use your create product endpoint
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`, // Include auth token
-      },
-      body: JSON.stringify(productData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Add product failed:", errorData);
-      throw new Error(errorData.message || "Failed to add product");
-    }
-
-    const data = await response.json(); // Parse the JSON response
-    return data; // Return the newly created product data
-  } catch (error) {
-    console.error("Error adding product:", error);
-    throw error;
-  }
+export const addProducts = async (formData) => {
+  const authToken = sessionStorage.getItem("authToken");
+  const response = await fetch(`${URL}/products`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+  if (!response.ok) throw new Error("Failed to add product");
+  return await response.json();
 };
+
 export const deleteProduct = async (id) => {
-  const authToken = localStorage.getItem("authToken");
+  const authToken = sessionStorage.getItem("authToken");
   const res = await fetch(`${URL}/products/${id}`, {
     method: "DELETE",
     headers: {
-     ' Authorization': `Bearer ${authToken}`,
+     Authorization: `Bearer ${authToken}`,
       "Content-Type": "application/json",
       Accept: "application/json",
     },
   });
   return res.json();
+};
+
+export const editProduct = async (id, formData) => {
+  const authToken = sessionStorage.getItem("authToken");
+  const response = await fetch(`${URL}/products/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+  if (!response.ok) throw new Error("Failed to edit product");
+  return await response.json();
 };

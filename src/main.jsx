@@ -6,11 +6,11 @@ import App from "./App.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Inventory from "./pages/Inventory.jsx";
-import Settings from "./pages/Settings.jsx";
+import Profile from "./pages/Profile.jsx";
 import TransactionHistory from "./pages/TransactionHistory.jsx";
 import Transactions from "./pages/Transactions.jsx";
 import Store from "./pages/Store.jsx";
-import Accounts from "./pages/Accounts.jsx";
+import AdminPanel from "./pages/AdminPanel.jsx";
 import About from "./pages/About.jsx";
 
 const router = createBrowserRouter([
@@ -47,12 +47,12 @@ const router = createBrowserRouter([
         element: <TransactionHistory />,
       },
       {
-        path: "/accounts",
-        element: <Accounts />,
+        path: "/adminPanel",
+        element: <AdminPanel />,
       },
       {
-        path: "/settings",
-        element: <Settings />,
+        path: "/profile",
+        element: <Profile />,
       },
     ],
   },

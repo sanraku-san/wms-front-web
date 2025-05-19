@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react'
   import { getProducts } from '../api/products';
 import { Loader2, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { createTransaction } from '../api/transactions';
+import { ToastContainer ,toast} from 'react-toastify';
 
 
   function Transactions() {
@@ -22,7 +23,7 @@ import { createTransaction } from '../api/transactions';
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const authToken = localStorage.getItem('authToken');
+  const authToken = sessionStorage.getItem('authToken');
 
   // --- Fetch Data ---
   useEffect(() => {
@@ -115,9 +116,11 @@ import { createTransaction } from '../api/transactions';
           const responseData = await createTransaction(transaction, authToken);
           // Handle success (e.g., show message, redirect)
           console.log('Transaction created:', responseData);
-          navigate('/transactionhistory', { state: { newTransaction: responseData.data } }); // Pass the new transaction
+          toast.success("Transaction created successfully!")
+          
       } catch (err) {
           setError(err.message || 'An error occurred while creating the transaction.');
+          toast.error("Transaction creation failed!")
       } finally {
           setLoading(false);
       }
@@ -300,6 +303,7 @@ import { createTransaction } from '../api/transactions';
                   {error && <p className="text-red-500 text-sm">{error}</p>}
               </form>
           </div>
+           <ToastContainer />
       </div>
   );
 }

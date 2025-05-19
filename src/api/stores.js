@@ -2,7 +2,7 @@ import {URL} from "./configuration";
 
 
 export const getStores = async () => {
-  const authToken = localStorage.getItem('authToken');
+  const authToken = sessionStorage.getItem('authToken');
   if (!authToken) {
     throw new Error('No authentication token found.');
   }
@@ -30,7 +30,7 @@ export const getStores = async () => {
   }
 };
 export const addStores = async (storeData) => {
-  const authToken = localStorage.getItem('authToken'); // Get auth token
+  const authToken = sessionStorage.getItem('authToken'); // Get auth token
   try {
     const response = await fetch(`${URL}/stores`, { //  Use your create store endpoint
       method: 'POST',
@@ -55,7 +55,7 @@ export const addStores = async (storeData) => {
   }
 };
 export const deleteStore = async (id) => {
-  const authToken = localStorage.getItem('authToken');
+  const authToken = sessionStorage.getItem('authToken');
   const res = await fetch(`${URL}/stores/${id}`,{
     method:"DELETE",
     headers:{

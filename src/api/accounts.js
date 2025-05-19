@@ -1,7 +1,7 @@
 import { URL } from "./configuration";
 
 export const getUsers = async () => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
       throw new Error('No authentication token found.');
     }
@@ -29,7 +29,7 @@ export const getUsers = async () => {
     }
   };
   export const addAccount = async (accountData) => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
       throw new Error('No authentication token found.');
     }
@@ -57,7 +57,7 @@ export const getUsers = async () => {
     }
   };
   export const deleteUser = async (id) => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = sessionStorage.getItem('authToken');
     const res = await fetch(`${URL}/users/${id}`,{
       method:"DELETE",
       headers:{

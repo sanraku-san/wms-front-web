@@ -20,7 +20,7 @@ function AppLayout({ sidebarOpen, toggleSidebar, setIsLoggedIn }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const removeAuthToken = () => {
-    localStorage.removeItem("authToken");
+    sessionStorage.removeItem("authToken");
   };
 
   // Function to handle logout
@@ -53,7 +53,7 @@ function AppLayout({ sidebarOpen, toggleSidebar, setIsLoggedIn }) {
       icon: <FaHistory />,
       path: "/transactionHistory",
     },
-    { name: "Accounts", icon: <FaUsers />, path: "/accounts" },
+    { name: "Admin Panel", icon: <FaUsers />, path: "/adminpanel" },
   ];
 
   return (

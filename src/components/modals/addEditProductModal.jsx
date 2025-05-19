@@ -24,19 +24,29 @@ function AddEditProductModal({ isOpen, onClose, onSave, currentProduct, categori
       }
     }
   }, [isOpen]);
+
+    useEffect(() => {
+    if (isOpen) {
+      setProduct(
+        currentProduct
+          ? { ...currentProduct }
+          : { name: '', barcode:'', category_id: '', price: 0, stock: 0, image: '', description: '' }
+      );
+      setImagePreview(currentProduct && currentProduct.image ? currentProduct.image : null);
+    }
+  }, [isOpen, currentProduct]);
   
   useEffect(() => {
     console.log("localCategories after updating:", localCategories);
   }, [localCategories]);
   
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
-      setProduct({ ...product, image: previewUrl });
-    }
-  };
+  const file = e.target.files[0];
+  if (file) {
+    setImagePreview(URL.createObjectURL(file));
+    setProduct({ ...product, image: file }); // Store the File, not the preview URL
+  }
+};
 
   const handleRemoveImage = () => {
     setImagePreview(null);
@@ -46,11 +56,35 @@ function AddEditProductModal({ isOpen, onClose, onSave, currentProduct, categori
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(product);
-    onClose();
-  };
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append('name', product.name);
+  formData.append('barcode', product.barcode);
+  formData.append('category_id', product.category_id);
+  formData.append('price', product.price);
+  formData.append('stock', product.stock); // Assuming you want to save stock as well
+  formData.append('description', product.description);
+
+  // Handle image for adding and editing
+  const file = fileInputRef.current?.files[0];
+
+  if (file) {
+    // If a new file is selected, append it
+    formData.append('image', file);
+  } else if (product.id && imagePreview === null && currentProduct?.image) {
+    // If editing and the image preview is null (user removed the image),
+    // send an empty string to the backend to clear the image field.
+    formData.append('image', '');
+  }
+  // If editing and no new file is selected, and the image preview is not null
+  // (meaning the existing image should be kept), we don't append the 'image' field.
+
+  onSave(formData, product.id); // Pass id for edit, undefined for add
+  onClose();
+};
+
 
   if (!isOpen) return null;
 

@@ -5,7 +5,7 @@ import withAuth from "../hoc/withAuth";
 import AccountModal from "../components/modals/AccountModal";
 import { ToastContainer, toast } from "react-toastify";
 
-function Accounts() {
+function AdminPanel() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState("All");
@@ -298,4 +298,4 @@ function Accounts() {
     </div>
   );
 }
-export default withAuth(Accounts);
+export default withAuth(AdminPanel);

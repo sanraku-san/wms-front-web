@@ -2,7 +2,7 @@ import { URL } from "./configuration";
 
 
 export const getCategories = async () => {
-    const authToken = localStorage.getItem('authToken'); // Get auth token
+    const authToken = sessionStorage.getItem('authToken'); // Get auth token
   
     try {
       const response = await fetch(`${URL}/categories`, { //  Use your get categories endpoint

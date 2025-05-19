@@ -1,7 +1,7 @@
 import { URL } from "./configuration";
 
 export const getTransactions = async () => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = sessionStorage.getItem('authToken');
     if (!authToken) {
       throw new Error('No authentication token found.');
     }
@@ -30,7 +30,7 @@ export const getTransactions = async () => {
   };
 
 export const createTransaction = async (transactionData) => {
-  const authToken = localStorage.getItem('authToken'); // Get auth token
+  const authToken = sessionStorage.getItem('authToken'); // Get auth token
   if (!authToken) {
       throw new Error('Authentication token is required');
   }

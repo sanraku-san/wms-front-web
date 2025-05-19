@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const withoutAuth = (WrappedComponent) => {
   const WithOutAuth = (props) => {
     const navigate = useNavigate();
-    const isLoggedIn = !!localStorage.getItem('authToken');
+    const isLoggedIn = !!sessionStorage.getItem('authToken');
 
     useEffect(() => {
       if (isLoggedIn) {

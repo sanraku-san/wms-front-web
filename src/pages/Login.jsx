@@ -35,7 +35,7 @@ import withoutAuth from '../hoc/withoutAuth';
       // **IMPORTANT: Replace 'access_token' with the actual key from your backend response**
       const authToken = responseData.data.token;
 
-      localStorage.setItem('authToken', authToken);
+      sessionStorage.setItem('authToken', authToken);
 
       navigate('/dashboard');
 
@@ -66,7 +66,7 @@ import withoutAuth from '../hoc/withoutAuth';
           <div className="bg-gradient-to-r from-indigo-600 to-blue-500 p-3 rounded-full mb-4 shadow-lg transform transition-all duration-300 hover:scale-110">
             <FaWarehouse className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-center text-3xl font-bold text-gray-900">Inventory Management</h1>
+          <h1 className="text-center text-3xl font-bold text-gray-900">WMS</h1>
           <h2 className="mt-3 text-center text-lg font-medium text-gray-600">Welcome back</h2>
         </div>
         
