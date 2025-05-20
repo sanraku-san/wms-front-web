@@ -63,10 +63,11 @@ export const deleteProduct = async (id) => {
 export const editProduct = async (id, formData) => {
   const authToken = sessionStorage.getItem("authToken");
   const response = await fetch(`${URL}/products/${id}`, {
-    method: "PUT",
+    method: "POST", // <-- CHANGE TO POST
     headers: {
       Authorization: `Bearer ${authToken}`,
       Accept: "application/json",
+      // DO NOT set Content-Type
     },
     body: formData,
   });

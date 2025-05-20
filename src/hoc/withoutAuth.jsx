@@ -8,7 +8,7 @@ const withoutAuth = (WrappedComponent) => {
 
     useEffect(() => {
       if (isLoggedIn) {
-        navigate('/dashboard'); 
+        navigate('/dashboard');
       }
     }, [isLoggedIn, navigate]);
     return !isLoggedIn ? <WrappedComponent {...props} /> : null; 

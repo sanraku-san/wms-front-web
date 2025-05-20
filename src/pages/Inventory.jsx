@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   FaPlus,
@@ -8,8 +8,9 @@ import {
   FaSortAmountUp,
   FaImage,
 } from "react-icons/fa";
-import { getProducts, addProducts, deleteProduct ,editProduct} from "../api/products";
-import AddEditProductModal from "../components/modals/addEditProductModal";
+import { getProducts, addProducts, deleteProduct, editProduct } from "../api/products";
+import AddProductModal from "../components/modals/AddProductModal";
+import EditProductModal from "../components/modals/EditProductModal";
 import DeleteProductModal from "../components/modals/deleteProductModal";
 import ProductDetailsModal from "../components/modals/productDetailsModal";
 import withAuth from "../hoc/withAuth";
@@ -26,12 +27,16 @@ function Inventory() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const [showAddEditModal, setShowAddEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const navigate = useNavigate();
-//retrieve
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1); // New state for current page
+  const productsPerPage = 10; // Show 10 products per page
+
+  // Retrieve products
   useEffect(() => {
     setLoading(true);
     getProducts()
@@ -44,8 +49,9 @@ function Inventory() {
         console.error("Error fetching products:", error);
         setLoading(false);
       });
-  }, []);
+  }, [refreshKey]);
 
+  // Filter and sort products
   useEffect(() => {
     let result = [...products];
 
@@ -75,7 +81,7 @@ function Inventory() {
     result.sort((a, b) => {
       let comparison = 0;
       if (sortField === "name") {
-        comparison = (a.name || "").localeCompare(b.name || ""); 
+        comparison = (a.name || "").localeCompare(b.name || "");
       } else if (sortField === "price") {
         comparison = (a.price || 0) - (b.price || 0);
       } else if (sortField === "stock") {
@@ -85,6 +91,7 @@ function Inventory() {
     });
 
     setFilteredProducts(result);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [products, searchTerm, selectedCategory, sortField, sortDirection]);
 
   const handleViewDetails = (product) => {
@@ -93,42 +100,42 @@ function Inventory() {
   };
 
   const handleDeleteProduct = (id) => {
-  deleteProduct(id)
-    .then((res) => {
-      console.log("Delete response:", res); 
-      if (res && (res.status === 200 || res.success)) { 
-        setProducts(products.filter((product) => product.id !== id));
-        setShowDeleteModal(false);
-        setProductToDelete(null);
-        toast.success("Product deleted successfully.");
-      } else {
-        toast.warning("Failed to delete product.");
-      }
-    })
-    .catch((error) => {
-      console.error("Delete error:", error);
-      toast.warning("Failed to delete this product.");
-    });
-};
+    deleteProduct(id)
+      .then((res) => {
+        console.log("Delete response:", res);
+        if (res && (res.status === 200 || res.success)) {
+          setProducts(products.filter((product) => product.id !== id));
+          setShowDeleteModal(false);
+          setProductToDelete(null);
+          toast.success("Product deleted successfully.");
+        } else {
+          toast.warning("Failed to delete product.");
+        }
+      })
+      .catch((error) => {
+        console.error("Delete error:", error);
+        toast.warning("Failed to delete this product.");
+      });
+  };
 
-//saving edited or created product
-const handleSaveProduct = async (formData, id) => {
+  const handleSaveProduct = async (formData, id) => {
     try {
+      console.log("Sending FormData:", Object.fromEntries(formData.entries()));
       let res;
       if (id) {
         res = await editProduct(id, formData);
+        console.log("Edit Product Response:", res);
         if (res && res.data) {
-          setProducts(
-            products.map((p) => (p.id === id ? { ...p, ...res.data } : p))
-          );
-          navigate('/inventory')
+          setProducts(products.map((p) => (p.id === id ? { ...p, ...res.data } : p)));
           toast.success("Product updated successfully.");
         } else {
           toast.error("Failed to update product.");
           console.error("Edit response invalid:", res);
         }
+        setShowEditModal(false);
       } else {
         res = await addProducts(formData);
+        console.log("Add Product Response:", res);
         if (res && res.data) {
           setProducts([...products, res.data]);
           toast.success("Successfully added");
@@ -136,15 +143,15 @@ const handleSaveProduct = async (formData, id) => {
           toast.error("Failed to add product.");
           console.error("Add response invalid:", res);
         }
+        setShowAddModal(false);
       }
+      setRefreshKey((prev) => prev + 1);
     } catch (error) {
       console.error("Error saving product", error);
       toast.error("Error saving product");
     }
-    setShowAddEditModal(false);
     setCurrentProduct(null);
   };
-
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("en-PH", {
@@ -152,6 +159,16 @@ const handleSaveProduct = async (formData, id) => {
       currency: "PHP",
       minimumFractionDigits: 2,
     }).format(value);
+  };
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -168,18 +185,7 @@ const handleSaveProduct = async (formData, id) => {
             </p>
           </div>
           <button
-            onClick={() => {
-              setCurrentProduct({
-                name: "",
-                barcode: "",
-                category: "",
-                price: 0,
-                stock: 0,
-                image: "",
-                description: "",
-              });
-              setShowAddEditModal(true);
-            }}
+            onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             <FaPlus /> Add New Product
@@ -188,7 +194,7 @@ const handleSaveProduct = async (formData, id) => {
       </div>
       {/* Search and Filters */}
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap- preuve4">
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FaSearch className="text-gray-400" />
@@ -268,7 +274,7 @@ const handleSaveProduct = async (formData, id) => {
               </select>
             </div>
 
-            {/* Stock Level Filter - Optional */}
+            {/* Stock Level Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Stock Level
@@ -307,53 +313,90 @@ const handleSaveProduct = async (formData, id) => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleViewDetails(product)}
-              >
-                {/* Image Section */}
-                <div className="h-48 bg-gray-100 flex items-center justify-center">
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <FaImage className="text-gray-400 text-4xl" />
-                  )}
-                </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {currentProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleViewDetails(product)}
+                >
+                  {/* Image Section */}
+                  <div className="h-48 bg-gray-100 flex items-center justify-center">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <FaImage className="text-gray-400 text-4xl" />
+                    )}
+                  </div>
 
-                {/* Name Section - Always Visible */}
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-800 text-center">
-                    {product.name}
-                  </h3>
+                  {/* Name Section */}
+                  <div className="p-4">
+                    <h3 className="font-medium text-gray-800 text-center">
+                      {product.name}
+                    </h3>
+                  </div>
                 </div>
+              ))}
+            </div>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 rounded-lg ${
+                      currentPage === page
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                >
+                  Next
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
       {/* Modals */}
-      <AddEditProductModal
-        isOpen={showAddEditModal}
-        onClose={() => setShowAddEditModal(false)}
+      <AddProductModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSave={handleSaveProduct}
+      />
+      <EditProductModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
         onSave={handleSaveProduct}
         currentProduct={currentProduct}
       />
-
       <DeleteProductModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteProduct}
         product={productToDelete}
       />
-
       <ProductDetailsModal
         isOpen={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
@@ -361,7 +404,7 @@ const handleSaveProduct = async (formData, id) => {
         formatCurrency={formatCurrency}
         onEdit={() => {
           setCurrentProduct(selectedProduct);
-          setShowAddEditModal(true);
+          setShowEditModal(true);
           setShowDetailsModal(false);
         }}
         onDelete={() => {
@@ -376,4 +419,5 @@ const handleSaveProduct = async (formData, id) => {
     </div>
   );
 }
+
 export default withAuth(Inventory);

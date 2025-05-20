@@ -29,7 +29,7 @@ export const TransactionDetailsModal = ({ transaction, onClose, onDelete }) => {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500">Date:</p>
-              <p className="font-semibold text-gray-800">{transaction.date}</p>
+              <p className="font-semibold text-gray-800">{transaction.created_at}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Store:</p>
@@ -39,7 +39,7 @@ export const TransactionDetailsModal = ({ transaction, onClose, onDelete }) => {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Type:</p>
-              <p className="font-semibold text-gray-800 capitalize">
+              <p className={`font-semibold capitalize ${transaction.transaction_type_id === 1 ? 'text-green-700' : 'text-red-600'}`}>
                 {transaction.transaction_type_id === 1 ? "Inbound" : "Outbound"}
               </p>
             </div>

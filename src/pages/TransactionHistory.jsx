@@ -135,15 +135,15 @@ function TransactionHistory() {
                               <div className="grid grid-cols-2 gap-4">
                                   <div>
                                       <p className="text-sm text-gray-500">Date</p>
-                                      <p className="font-medium">{txn.date}</p>
+                                      <p className="font-medium">{txn.created_at}</p>
                                   </div>
                                   <div>
                                       <p className="text-sm text-gray-500">Store</p>
                                       <p className="font-medium">{txn.store?.name}</p>
                                   </div>
                                   <div>
-                                      <p className="text-sm text-gray-500">Type</p>
-                                      <p className="font-medium capitalize">{txn.transaction_type_id === 1 ? 'Inbound' : 'Outbound'}</p>
+                                      <p className="text-sm text-gray-5 00">Type</p>
+                                      <p className={`font-medium capitalize ${txn.transaction_type.id === 1 ? 'text-green-700' : 'text-red-600'}`}>{txn.transaction_type_id === 1 ? 'Inbound' : 'Outbound'}</p>
                                   </div>
                                   <div>
                                       <p className="text-sm text-gray-500">Amount</p>
