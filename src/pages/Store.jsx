@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
+<<<<<<< Updated upstream
 export default function Store() {
   const [stores, setStores] = useState([
     { 
@@ -68,6 +69,9 @@ export default function Store() {
     setCurrentStore({ id: null, name: '', address: '', contact: '' });
   };
 
+=======
+function Store() {
+>>>>>>> Stashed changes
   return (
     <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Page Header */}
@@ -77,10 +81,7 @@ export default function Store() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Store Management</h1>
             <p className="text-gray-500 mt-1">Manage your store locations</p>
           </div>
-          <button
-            onClick={handleAdd}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
-          >
+          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-sm">
             + Add Store
           </button>
         </div>
@@ -88,6 +89,7 @@ export default function Store() {
 
       {/* Store Grid */}
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+<<<<<<< Updated upstream
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {stores.map(store => (
             <div 
@@ -193,6 +195,11 @@ export default function Store() {
         </div>
       )}
 
+=======
+       
+      </div>
+
+>>>>>>> Stashed changes
       <Outlet />
     </div>
   )

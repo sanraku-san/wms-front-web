@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+<<<<<<< Updated upstream
 export default function TransactionHistory() {
   const location = useLocation();
   const [transactions, setTransactions] = useState(() => {
@@ -102,6 +103,28 @@ export default function TransactionHistory() {
         ) : (
           <p className="mt-4 text-gray-500">No transactions found matching your filters</p>
         )}
+=======
+
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP' 
+    }).format(amount);
+};
+
+function TransactionHistory() {
+
+  return (
+      <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 py-8 space-y-8">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+              <h1 className="text-2xl font-bold text-gray-800">Transaction History</h1>
+
+              {/* Transaction List */}
+                  <div className="mt-8 space-y-4">
+               
+          </div>
+      </div>
+>>>>>>> Stashed changes
       </div>
     </div>
   );
